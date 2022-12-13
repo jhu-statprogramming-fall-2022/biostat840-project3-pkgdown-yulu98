@@ -1,0 +1,190 @@
+---
+title: "Example Analysis"
+---
+
+#### Question
+
+What impact the popularity of a song for Martin Garrix songs?
+
+#### Data Origin
+
+The origin of the data comes from [TidyTuesday](https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-01-21).
+
+
+
+::: column-margin
+
+Tidy Tuesday provides interesting date sets every Tuesday. (https://github.com/rfordatascience/tidytuesday)
+
+:::
+
+#### Load Data
+
+```{r, message=FALSE, warning=FALSE}
+library(here)
+if(!file.exists(here("data","spotify_songs.RDS"))){
+  tuesdata <- tidytuesdayR::tt_load('2020-01-21') 
+  tuesdata <- tidytuesdayR::tt_load(2020, week = 4)
+
+  spotify_songs <- tuesdata$spotify_songs
+  saveRDS(tuesdata$spotify_songs, file = here("data","spotify_songs.RDS"))
+}
+```
+
+```{r, eval=TRUE, message=FALSE}
+spotify_songs <- readRDS(here("data","spotify_songs.RDS"))
+```
+
+#### Data wrangling
+
+I used tidyverse[@tidyverse], dplyr[@dplyr], lubridate[@lubridate] to wrangle the data.
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(dplyr)
+library(lubridate) 
+library(ggplot2)
+library(RColorBrewer)
+```
+
+```{r, message=FALSE, warning=FALSE}
+data <- spotify_songs %>%
+  drop_na() %>%
+  select(-track_id, -track_album_id, -track_album_name, -playlist_name,
+         -playlist_id, -playlist_genre, -playlist_subgenre) %>%
+  mutate(year = year(ymd(track_album_release_date))) %>%
+  filter(year >= 2014) %>%
+  filter(track_artist == "Martin Garrix")
+```
+
+
+
+#### Data visulization and analysis
+
+
+::: callout-note
+## Distribution of the popularity vs released time
+
+We first show the distribution of the popularity of Martin Garrix's songs  against released time with a scatter plot.
+:::
+
+```{r}
+data %>% 
+  ggplot(aes(x = track_album_release_date, y = track_popularity)) + 
+  geom_point() +
+  labs(title = "Popularity vs released date",
+       subtitle = "Martin Garrix's songs have low popularity (<20) mostlt before the first half year of 2016 and one time at 2019",
+       caption = "Data source: TidyTuesday") + 
+  labs(x = "Released Date",
+       y = "Popularity") +
+    theme(plot.title = element_text(size = 20),
+      plot.subtitle = element_text(size = 10),
+      axis.title = element_text(size = 10),
+      axis.text.x = element_text(size = 8, angle = 50, hjust = 0.8),
+      axis.text.y = element_text(size = 8))
+
+```
+
+::: callout-note
+## Yearly average of the popularity of Martin Garrix's songs
+
+Calculate the average of the popularity of Martin Garrix's songs for each year.
+:::
+
+```{r}
+str_dat <- data |> split(data$year)
+str_dat |> map(.f = ~mean(.x$track_popularity))
+```
+
+The average popularity of Martin Garrix's songs increase across years.
+
+::: callout-note
+## Distribution of popularity of Martin Garrix's songs for each year
+
+We then show the distribution of popularity of Martin Garrix's songs for each year with violin plot.
+:::
+
+```{r}
+data %>% 
+  mutate(year = factor(year)) %>%
+  ggplot(aes(x = year, y = track_popularity)) +
+  geom_violin() +
+  labs(title = "Popularity vs released year",
+       subtitle = "The popularity of Martin Garrix's songs has a trend of growth across years",
+       caption = "Data source: TidyTuesday") + 
+  labs(x = "Released Year",
+       y = "Popularity") +
+    theme(plot.title = element_text(size = 20),
+      plot.subtitle = element_text(size = 10),
+      axis.title = element_text(size = 10),
+      axis.text.x = element_text(size = 8, angle = 50, hjust = 0.8),
+      axis.text.y = element_text(size = 8))
+```
+
+::: callout-note
+## Populartiy over different features
+
+We will show the distribution of the popularity of Martin Garrix's songs over different features
+:::
+
+```{r, warnings = FALSE, message=FALSE}
+data %>% 
+  pivot_longer(-c(track_album_release_date, track_artist,
+                  track_name, track_popularity, tempo, duration_ms,
+                  key, year, loudness), 
+               names_to = "feature", values_to = "value") %>%
+  ggplot(aes(x = value, y = track_popularity)) + 
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~ feature, ncol = 4) + 
+  labs(title = "Populartiy over different features",
+       subtitle = "Acousticness, danceability and liveness have impact on the popularity of Martin Garrix's songs",
+       caption = "Data source: TidyTuesday") + 
+  labs(x = "Different Features",
+       y = "Popularity") +
+    theme(plot.title = element_text(size = 20),
+      plot.subtitle = element_text(size = 10),
+      axis.title = element_text(size = 10),
+      axis.text.x = element_text(size = 8, angle = 50, hjust = 0.8),
+      axis.text.y = element_text(size = 8))
+```
+
+
+
+```{r, warnings = FALSE, message=FALSE}
+data %>% 
+  pivot_longer(-c(track_album_release_date, track_artist,
+                  track_name, track_popularity, tempo, duration_ms,
+                  key, year, loudness), 
+               names_to = "feature", values_to = "value") %>%
+  ggplot(aes(x = value, y = track_popularity, color = feature)) + 
+  geom_point() + 
+  geom_smooth() +  
+  scale_colour_brewer(palette = "PiYG") + 
+  labs(title = "Populartiy over different features",
+       subtitle = "Acousticness, danceability and liveness have impact on the popularity of Martin Garrix's songs",
+       caption = "Data source: TidyTuesday") + 
+  labs(x = "Different Features",
+       y = "Popularity") +
+    theme(plot.title = element_text(size = 20),
+      plot.subtitle = element_text(size = 10),
+      axis.title = element_text(size = 10),
+      axis.text.x = element_text(size = 8, angle = 50, hjust = 0.8),
+      axis.text.y = element_text(size = 8))
+
+display.brewer.pal(8, "PiYG")
+```
+
+
+## Function Used
+
+| **`dplyr`** | **`tidyr`**     | **`ggplot2`**  |**`lubridate`**|**`purrr`**|
+|-------------|-----------------|----------------|---------------|-----------|
+| `mutate()`  | `drop_na()`     | `geom_smooth()`|   `year()`    |`map()`    |
+| `select()`  | `seperate()`    | `geom_violin()`|   `ymd()`     |`split()`  |
+| `filter()`  | `pivot_longer()`| `geom_point()` |               |           |
+| `group_by()`|                 |                |               |           |
+
+
+
+

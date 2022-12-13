@@ -1,0 +1,32 @@
+url: ~
+template:
+  bootstrap: 5
+  bootswatch: cyborg
+  theme: arrow-dark
+  bslib:
+    pkgdown-nav-height: 100px
+    bg: "#202123"
+    fg: "#B8BCC2"
+    primary: "#306cc9"
+navbar:
+  structure:
+   left:  [search]
+   right: [reference, articles]
+  components:
+   articles:
+    text: "Example_Analysis"
+    href: file:///Users/luyu/Dropbox/Mac/Documents/JHU/Computing/RColorBrewer/Example_Analysis.html
+
+footer:
+  structure:
+    left: pkgdown
+    right: [authors, legal]
+  components:
+    legal: Provided without **any warranty**.
+home:
+  links:
+  - text: Link text
+    href: https://website.com
+  - text: Roadmap
+    href: /roadmap.html
+
