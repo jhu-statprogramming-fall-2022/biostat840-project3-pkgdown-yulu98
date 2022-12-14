@@ -17,6 +17,10 @@ Erich Neuwirth, University of Vienna, erich.neuwirth@univie.ac.at
 
 https://github.com/yulu98/RColorBrewer.git
 
+## Link to the site
+
+https://jhu-statprogramming-fall-2022.github.io/biostat840-project3-pkgdown-yulu98/
+
 ## Customization of Website
 
 1. Changed the visual style of the site with bootswatch
